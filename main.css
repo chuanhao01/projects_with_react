@@ -1,0 +1,7 @@
+/* Reseting stuff */
+ul{
+    list-style: none;
+    list-style-image: none;
+    margin: 0;
+    padding: 0;
+}
