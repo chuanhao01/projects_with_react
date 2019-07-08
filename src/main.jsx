@@ -84,13 +84,16 @@ class Quiz extends React.Component{
         });
     }
     render(){
-        console.log(this.state.selected_questions.length);
-        console.log(this.state.states_of_child.quiz_3);
+        let state_of_quiz_3 = this.state.states_of_child.quiz_3;
+        let quiz_obj;
+        if(state_of_quiz_3){
+            quiz_obj = <GetQuiz_3 questions={this.state.selected_questions} state_to_show={this.state.states_of_child.quiz_3} />;
+        }
         return (
             <div>
                 <GetName_1 state_to_show={this.state.states_of_child.name_1} callback_when_done={this.getName} />
                 <GetTopic_2 state_to_show={this.state.states_of_child.topic_2} name={this.state.name} topics={this.state.topics} callback_when_done={this.getTopic} />
-                <GetQuiz_3 questions={this.state.selected_questions} state_to_show={this.state.states_of_child.quiz_3} />
+                {quiz_obj}
             </div>
         );
     }
@@ -222,6 +225,7 @@ class GetQuiz_3 extends React.Component{
     }
     handleUserInput(user_input){
         let current_index = this.state.current_index;
+        let questions = this.state.questions;
         if(user_input === 'N'){
             this.setState({
                 current_index: this.state.current_index + 1,
@@ -234,21 +238,36 @@ class GetQuiz_3 extends React.Component{
         }
         else{
             let answers = this.state.user_answers.slice();
-            answers[this.current_index] = user_input; 
+            answers[current_index] = [user_input, questions[current_index].options[user_input-1]]; 
             this.setState({
-                user_answers: answer,
+                user_answers: answers,
                 current_index: current_index + 1,
             });
         }
+        if(current_index >= this.state.user_answers){
+            this.setState({
+                show_questions: false,
+                show_checks: true,
+            });
+        }
+    }
+    handleCheckInput(user_input){
+
     }
     render(){
         let check_state = this.props.state_to_show;
-        // bug
-        console.log(this.props.questions);
-        console.log(this.state.questions);
-        console.log(this.state.questions[this.state.current_index]);
+        let show_questions = this.state.show_questions;
+        let show_checks = this.state.show_checks;
+        console.log(this.state.user_answers);
         if(check_state){
-            return <Question state_to_show={this.state.show_questions} index={this.state.current_index} question={this.state.questions[this.state.current_index]} callback_when_done={this.handleUserInput} />
+            if(show_questions){
+                return( 
+                    <div>
+                        <Question state_to_show={this.state.show_questions} index={this.state.current_index} question={this.state.questions[this.state.current_index]} callback_when_done={this.handleUserInput} />
+                        <CheckAnswers state_to_show={this.state.show_checks} questions={this.state.questions} user_answers={this.state.user_answers} callback_when_done={this.handleCheckInput} />
+                    </div>
+                );
+            }
         }
         else{
             return null;
@@ -269,9 +288,9 @@ class Question extends React.Component{
     handleChange(event){
         let options = this.props.question.options;
         let value = event.target.value;
-        let index = this.state.current_index;
+        let index = this.props.index;
         if(index === 0){
-            if(value === 'N' || (value > 0 && value < options.length)){
+            if(value === 'N' || (value > 0 && value < options.length + 1)){
                 this.setState({
                     input: value,
                     check_input: true,
@@ -285,7 +304,7 @@ class Question extends React.Component{
             }
         }
         else{
-            if(value === 'N' || (value > 0 && value < options.length) || value === 'P'){
+            if(value === 'N' || (value > 0 && value < options.length + 1) || value === 'P'){
                 this.setState({
                     input: value,
                     check_input: true,
@@ -309,33 +328,96 @@ class Question extends React.Component{
             value = parseInt(value);
             this.props.callback_when_done(value);
         }
+        this.setState({
+            input: '',
+            check_input: false,
+        });
     }
     render(){
+        let check_state = this.props.state_to_show;
         let index = this.props.index;
         let question = this.props.question;
         let options = question.options;
-        options = options.map((option, index) => {
-            return (
-                <li key={index}>
-                    ({index + 1}) {option}
-                </li>
-            );
+        let num_of_options = options.length;
+        let options_objs = options.map((option, index) => 
+            <li key={index}>
+                {option}
+            </li>
+        );
+        if(check_state){
+            if(index === 0){
+                return (
+                    <div className='container-fluid'>
+                        <h2 className='row'>Question {index + 1}: {question.question}</h2>
+                        <ul>
+                            {options_objs}
+                        </ul>
+                        <div className="w-100"></div>
+                        <p>&#60;enter 1 to {num_of_options} to answer or N for the next question&#62;</p>
+                        <form className='container-fluid row' onSubmit={this.handleSubmit}>
+                            <div className='row mb-1'>
+                                <label for='option' className='mr-3'>>></label>
+                                <input type='text' id='option' value={this.state.input} onChange={this.handleChange}></input>
+                            </div>
+                            <div className="w-100"></div>
+                            <input type='submit' value='Submit' className='row' disabled={!this.state.check_input}></input>
+                        </form>
+                    </div>
+                );
+            }
+            else{
+                return (
+                    <div className='container-fluid'>
+                        <h2 className='row'>Question {index + 1}: {question.question}</h2>
+                        <ul>
+                            {options_objs}
+                        </ul>
+                        <p>&#60;enter 1 to {num_of_options} to answer, P for the previous question, N for the next question&#62;</p>
+                        <form className='container-fluid row' onSubmit={this.handleSubmit}>
+                            <div className='row mb-1'>
+                                <label for='option' className='mr-3'>>></label>
+                                <input type='text' id='option' value={this.state.input} onChange={this.handleChange}></input>
+                            </div>
+                            <div className="w-100"></div>
+                            <input type='submit' value='Submit' className='row' disabled={!this.state.check_input}></input>
+                        </form>
+                    </div>
+                );  
+            }
+        }
+        else{
+            return null;
+        }
+    }
+}
+
+//bugged out
+class CheckAnswers extends React.Component{
+    constructor(props){
+        super(props);
+        this.state = {
+            questions: this.props.questions,
+        };
+    }
+    render(){
+        let check_state = this.props.state_to_show;
+        let questions = this.state.questions;
+        if(check_state === false){
+            this.setState({
+                user_answers: this.props.user_answers,
+            });
+        }
+        let user_answers = this.state.user_answers;
+        let questions_and_answers_to_show = questions.map((question, index) => {
+            <li key={index}>
+                <p>{question.question}</p>
+                <p>Your Answer: ({user_answers[index][0]}) {user_answers[index][1]}</p>
+            </li>
         });
-        if(index === 0){
+        if(check_state){
             return (
                 <div className='container-fluid'>
-                    <h2 className='row'>Question {index + 1}: {question.question}</h2>
-                    <ul className='row'>
-                        {options}
-                    </ul>
-                    <form className='container-fluid row' onSubmit={this.handleSubmit}>
-                        <div className='row'>
-                            <label for='option' className='mr-3'>>></label>
-                            <input type='text' id='option' value={this.state.input} onChange={this.handleChange}></input>
-                        </div>
-                        <div className="w-100"></div>
-                        <input type='submit' value='Submit' className='row' disabled={!this.state.check_input}></input>
-                    </form>
+
                 </div>
             );
         }
