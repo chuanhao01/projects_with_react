@@ -1,10 +1,36 @@
+// function to shuffle an array
+function shuffle(ori_array){
+    for(let i=ori_array.length-1; i>0; i--){
+        let random_i = Math.floor(Math.random() * (i+1));
+        [ori_array[i], ori_array[random_i]] = [ori_array[random_i], ori_array[i]];
+    }
+    return ori_array;
+}
 // Parsing files
 // takes in an array of [question, options, answer] to make a MCQ object
 class MCQ{
     constructor(mcq_arr){
         this.question = mcq_arr[0];
-        this.options = mcq_arr[1];
-        this.answer = mcq_arr[2];
+        this.options = this.setUpAnswer(mcq_arr[1], mcq_arr[2]);
+        this.user_answer = null;
+    }
+    setUpAnswer(options, answer){
+        let rtr_options = [];
+        for(let i=0; i<options.length; i++){
+            if(i === answer-1){
+                rtr_options.push({
+                    option: options[i],
+                    isAnswer: true,
+                });
+            }
+            else{
+                rtr_options.push({
+                    option: options[i],
+                    isAnswer: false,
+                });
+            }
+        }
+        return rtr_options;
     }
 }
 
@@ -41,3 +67,4 @@ for(let i=0; i<arr_of_text.length; i++){
     topics.push(topics_and_question[0]);
     questions.push(topics_and_question[1]);
 }
+
