@@ -75,12 +75,14 @@
                         </template>
                         <template v-if='template_to_show === "Quiz_3"'>
                             <p class="w-100 text-center d-block">Topic Choosen: {{selected_topic}}</p>
-                                <b-card-group columns class="questions_cards">
-                                    <b-card 
-                                    v-for='question in selected_questions'
-                                    :title='question.question' 
+                                <b-card-group deck
+                                v-for='question in questions' 
+                                >
+                                    <quiz-question
+                                    :question='question'
                                     >
-                                    </b-card>
+                                    
+                                    </quiz-question>
                                 </b-card-group>
                         </template>
                     </div>
@@ -121,6 +123,12 @@
                         this.template_to_show = 'Quiz_3';
                     }
                 },
+            });
+            let v_question = Vue.instance('quiz-question' ,{
+                props: ['question'],
+                template: `
+                
+                `,
             });
         </script>
 </body>

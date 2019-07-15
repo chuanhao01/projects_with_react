@@ -30,6 +30,7 @@ class MCQ{
                 });
             }
         }
+        rtr_options = shuffle(rtr_options);
         return rtr_options;
     }
 }
