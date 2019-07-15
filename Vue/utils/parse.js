@@ -13,6 +13,8 @@ class MCQ{
         this.question = mcq_arr[0];
         this.options = this.setUpAnswer(mcq_arr[1], mcq_arr[2]);
         this.user_answer = null;
+        this.isCorrect = null;
+        this.shuffleOptions();
     }
     setUpAnswer(options, answer){
         let rtr_options = [];
@@ -30,8 +32,21 @@ class MCQ{
                 });
             }
         }
-        rtr_options = shuffle(rtr_options);
         return rtr_options;
+    }
+    shuffleOptions(){
+        this.options = shuffle(this.options);
+    }
+    updateUserAnswer(user_selected){
+        this.user_answer = user_selected;
+        let options = this.options;
+        // checking if the answer is correct
+        if(options[user_selected].isAnswer){
+            this.isCorrect = true;
+        }
+        else{
+            this.isCorrect = false;
+        }
     }
 }
 
