@@ -48,6 +48,23 @@ class MCQ{
             this.isCorrect = false;
         }
     }
+    getCorrectAnswer(){
+        let options = this.options;
+        for(let index in options){
+            index = parseInt(index);
+            if(options[index].isAnswer){
+                return `(${index + 1}) ${options[index].option}`;
+            }
+        }
+    }
+    getUserAnswer(){
+        return `(${this.user_answer + 1}) ${this.options[this.user_answer].option}`;
+    }
+    reset(){
+        this.user_answer = null;
+        this.isCorrect = null;
+        this.shuffleOptions();
+    }
 }
 
 // takes an input of raw data from a text file, returns topic, array of MCQ objects for that topic
